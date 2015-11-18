@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nakeyfishzh.coolweather14.R;
+import com.nakeyfishzh.coolweather14.service.AutoUpdateService;
 import com.nakeyfishzh.coolweather14.util.HttpCallbackListener;
 import com.nakeyfishzh.coolweather14.util.HttpUtil;
 import com.nakeyfishzh.coolweather14.util.Utility;
@@ -154,6 +155,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener
 
         layout_weather_info.setVisibility(View.VISIBLE);
         textView_city_name.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     @Override
