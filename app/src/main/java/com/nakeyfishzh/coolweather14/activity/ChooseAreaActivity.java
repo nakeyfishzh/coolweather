@@ -2,7 +2,10 @@ package com.nakeyfishzh.coolweather14.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -55,6 +58,17 @@ public class ChooseAreaActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sp.getBoolean("citySelected", false))
+        {
+            Intent intent = new Intent(this, WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
 
@@ -78,6 +92,14 @@ public class ChooseAreaActivity extends Activity
                 {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }
+                else if (currentLevel == LEVEL_COUNTY)
+                {
+                    String countyCode = countyList.get(position).getCode();
+                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+                    intent.putExtra("countyCode", countyCode);
+                    startActivity(intent);
+                    finish();
                 }
                 else {
                     Toast.makeText(ChooseAreaActivity.this, "没有了了", Toast.LENGTH_SHORT).show();
