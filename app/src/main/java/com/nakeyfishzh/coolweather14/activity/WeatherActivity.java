@@ -1,12 +1,14 @@
 package com.nakeyfishzh.coolweather14.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,7 +20,7 @@ import com.nakeyfishzh.coolweather14.util.Utility;
 /**
  * Created by walker on 15/11/18.
  */
-public class WeatherActivity extends Activity
+public class WeatherActivity extends Activity implements View.OnClickListener
 {
     private LinearLayout layout_weather_info;
     private TextView textView_city_name;
@@ -27,6 +29,8 @@ public class WeatherActivity extends Activity
     private TextView textView_weather_desp;
     private TextView textView_temp1;
     private TextView textView_temp2;
+    private Button button_switch_city;
+    private Button button_refresh_weather;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +47,11 @@ public class WeatherActivity extends Activity
         textView_temp1 = (TextView) findViewById(R.id.textView_temp1);
         textView_temp2 = (TextView) findViewById(R.id.textView_temp2);
         textView_current_date = (TextView) findViewById(R.id.textView_current_date);
+
+        button_switch_city = (Button) findViewById(R.id.button_switch_city);
+        button_refresh_weather = (Button) findViewById(R.id.button_refresh_weather);
+        button_switch_city.setOnClickListener(this);
+        button_refresh_weather.setOnClickListener(this);
 
         String countyCode = getIntent().getStringExtra("countyCode");
         if (!TextUtils.isEmpty(countyCode))
@@ -64,7 +73,7 @@ public class WeatherActivity extends Activity
     private void queryWeatherCode(String countyCode)
     {
         String address = "http://www.weather.com.cn/data/list3/city" + countyCode + ".xml";
-        queryFromServer(address, "countyCode");
+        queryWeatherFromServer(address, "countyCode");
     }
 
     /**
@@ -73,13 +82,13 @@ public class WeatherActivity extends Activity
     private void queryWeatherInfo(String weatherCode)
     {
         String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
-        queryFromServer(address, "weatherCode");
+        queryWeatherFromServer(address, "weatherCode");
     }
 
     /**
      * 根据地址和类型去向服务器查询天气代号或天气信息
      */
-    private void queryFromServer(final String address, final String type)
+    private void queryWeatherFromServer(final String address, final String type)
     {
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener()
         {
@@ -140,10 +149,37 @@ public class WeatherActivity extends Activity
         textView_temp1.setText(sp.getString("temp1", ""));
         textView_temp2.setText(sp.getString("temp2", ""));
         textView_weather_desp.setText(sp.getString("weatherDesp", ""));
-        textView_publish_text.setText(sp.getString("publishTime", ""));
+        textView_publish_text.setText("今天"+sp.getString("publishTime", "")+"发布");
         textView_current_date.setText(sp.getString("currentDate", ""));
 
         layout_weather_info.setVisibility(View.VISIBLE);
         textView_city_name.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.button_switch_city:
+                Intent intent = new Intent(this, ChooseAreaActivity.class);
+                intent.putExtra("FromWeatherActivity", true);
+                startActivity(intent);
+                finish();
+                break;
+
+            case R.id.button_refresh_weather:
+                textView_publish_text.setText("同步中...");
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCode = sp.getString("weatherCode", "");
+                if (!TextUtils.isEmpty(weatherCode))
+                {
+                    queryWeatherInfo(weatherCode);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
 }

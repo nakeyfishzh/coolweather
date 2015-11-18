@@ -32,6 +32,9 @@ import java.util.List;
  */
 public class ChooseAreaActivity extends Activity
 {
+    // 是否是从WeatherActivity中跳转过来的
+    private boolean isFromWeatherActivity;
+
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -59,8 +62,11 @@ public class ChooseAreaActivity extends Activity
     {
         super.onCreate(savedInstanceState);
 
+        isFromWeatherActivity = getIntent().getBooleanExtra("FromWeatherActivity", false);
+
+        // 已经选择了城市，并且不是从WeatherActivity过来的，才会跳转到WeatherActivity
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sp.getBoolean("citySelected", false))
+        if (sp.getBoolean("citySelected", false) && !isFromWeatherActivity)
         {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
@@ -129,7 +135,7 @@ public class ChooseAreaActivity extends Activity
             textViewTitle.setText("天朝");
             currentLevel = LEVEL_PROVINCE;
         } else {
-            queryFromServer(null, "province");
+            queryAddressFromServer(null, "province");
         }
     }
 
@@ -151,7 +157,7 @@ public class ChooseAreaActivity extends Activity
             textViewTitle.setText(selectedProvince.getName());
             currentLevel = LEVEL_CITY;
         } else {
-            queryFromServer(selectedProvince.getCode(), "city");
+            queryAddressFromServer(selectedProvince.getCode(), "city");
         }
     }
 
@@ -173,14 +179,14 @@ public class ChooseAreaActivity extends Activity
             textViewTitle.setText(selectedCity.getName());
             currentLevel = LEVEL_COUNTY;
         } else {
-            queryFromServer(selectedCity.getCode(), "county");
+            queryAddressFromServer(selectedCity.getCode(), "county");
         }
     }
 
     /**
      * 根据传入的代号和类型从服务器上查询省市县数据
      */
-    private void queryFromServer(final String code, final String type)
+    private void queryAddressFromServer(final String code, final String type)
     {
         String address;
         if (!TextUtils.isEmpty(code)) {
@@ -286,6 +292,12 @@ public class ChooseAreaActivity extends Activity
         } else if (currentLevel == LEVEL_CITY) {
             queryProvinces();
         } else {
+            if (isFromWeatherActivity)
+            {
+                Intent intent = new Intent(this, WeatherActivity.class);
+                startActivity(intent);
+            }
+
             finish();
         }
     }

@@ -97,7 +97,7 @@ public class Utility
                     county.setName(array[1]);
                     county.setCityId(cityId);
 
-                    // 将解析出来的数据存储至City表
+                    // 将解析出来的数据存储至County表
                     coolWeatherDB.saveCounty(county);
                 }
 
@@ -138,6 +138,7 @@ public class Utility
                                        String temp1, String temp2, String weatherDesp, String publishTime)
     {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年M月d日");
+
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean("citySelected", true);
         editor.putString("cityName", cityName);
